@@ -1,0 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
+#news-analyser-popup {
+    --color-text: #15181B;
+    color: var(--color-text);
+    --accent-color: #1985a1;
+    --accent-color-dark: #185A6A;
+    --paynes-pain: #4C5C68;
+    --alert-alert: #981B00;
+    --prussian-blue: #1C374C;
+    --prussian-blue-dark: #0C1D2A;
+    --background-color: #fff;
+    --results-background-color: #eff2ef;
+    width: 400px;
+    height: 400px;
+    margin: 0;
+    padding: 24px 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-color);
+}
+
+td svg {
+    vertical-align: text-top;
+  }
+
+
+#news-analyser-popup #daResultsTable {
+    border-collapse: collapse;
+    width: 100%;
+    border-style: hidden;
+    box-shadow: 0 0 0 1px #ddd;
+    border-radius: 3px;
+}
+
+#news-analyser-popup #daResultsTable td,
+#news-analyser-popup #daResultsTable th {
+    vertical-align: middle;
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#news-analyser-popup #daResultsTable th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: var(--prussian-blue);
+    color: white;
+}
+
+#news-analyser-popup #resultsWindow {
+    border-radius: 20px;
+    box-sizing: border-box;
+    color: initial;
+    display: flex;
+}
+
+.newspaper-content-text,
+.newspaper-content-blocks {
+    transform-origin: center center;
+    scale: 0.95;
+    fill: #1985a1;
+}
+
+.newspaper-content-text {
+    animation: pulse 2s infinite;
+}
+
+.newspaper-content-blocks {
+    animation: pulse 2s infinite 0.5s;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.7;
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+    }
+
+    70% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        opacity: 0.7;
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
+
+body#news-analyser-popup {
+    font-family: "Lato", sans-serif;
+}
+
+#news-analyser-popup .header {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+#news-analyser-popup .header-title {
+    font-size: large;
+    margin: 0;
+}
+
+#news-analyser-popup .cogwheel-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+#news-analyser-popup .cogwheel-button:active {
+    transform: scale(0.9);
+}
+
+#news-analyser-popup .cogwheel-button.clicked {
+    transform: rotate(45deg);
+}
+
+#news-analyser-popup .cogwheel-button img {
+    width: 20px;
+    height: 20px;
+}
+
+#news-analyser-popup #apiKeySection {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+#news-analyser-popup #analysisSection {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-top: 20px;
+}
+
+#news-analyser-popup input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    border-radius: 3px;
+    border: 1px solid var(--paynes-pain);
+    background-color: var(--background-color);
+}
+
+#news-analyser-popup .blue-button {
+    width: 50%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: larger;
+    border-radius: 3px;
+    overflow: hidden;
+    transition: background-color 0.25s;
+    align-self: center;
+    justify-self: center;
+}
+
+#news-analyser-popup .blue-button:hover {
+    background-color: var(--accent-color-dark);
+}
+
+#news-analyser-popup #message {
+    margin-bottom: 10px;
+    color: var(--alert-alert);
+    font-size: medium;
+}
+
+#news-analyser-popup #loading {
+    align-self: center;
+    justify-self: center;
+    width: 50%;
+    padding: 20px;
+}
+
+#news-analyser-popup .hidden {
+    display: none !important;
+}
+
+#news-analyser-popup .scrollable-content {
+    max-height: 300px;
+    overflow-y: auto;
+    border: none;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+#news-analyser-popup #articlesContent {
+    border-radius: 3px;
+    box-sizing: border-box;
+    color: initial;
+    background-color: var(--results-background-color);
+    padding: 10px;
+
+}
+
+#news-analyser-popup .usage {
+    font-size: small;
+    margin-top: 12px;
+}
+
+.know-more {
+    font-size: small;
+}
+
+.know-more a {
+    color: var(--prussian-blue);
+    transition: color 0.25s;
+}
+
+.know-more a:hover {
+    color: var(--prussian-blue-dark);
+}
