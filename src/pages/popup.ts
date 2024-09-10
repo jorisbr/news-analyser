@@ -149,8 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const cost = data.outputTokens * 0.0000006 + data.inputTokens * 0.00000015
-        const usageLine = `<p class='usage'>Estimated cost: $${cost.toFixed(4)}</p>`
-        popup.querySelector('#articlesContent')!.insertAdjacentHTML('beforeend', usageLine);
+        console.log(`Estimated cost: ${cost}`)
     }
 
     function getSelectorByDomain(url: string): string | undefined {

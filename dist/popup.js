@@ -102,7 +102,7 @@ function analyseWithLLM(html) {
                 const requestBody = {
                     model: 'gpt-4o-mini',
                     messages: [{ role: 'user', content: fullPrompt }],
-                    top_p: 0.2,
+                    top_p: 0,
                     seed: 1,
                     response_format: {
                         type: 'json_schema',
@@ -359,8 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsTableTBody.appendChild(row);
         });
         const cost = data.outputTokens * 0.0000006 + data.inputTokens * 0.00000015;
-        const usageLine = `<p class='usage'>Estimated cost: $${cost.toFixed(4)}</p>`;
-        popup.querySelector('#articlesContent').insertAdjacentHTML('beforeend', usageLine);
+        console.log(`Estimated cost: ${cost}`);
     }
     function getSelectorByDomain(url) {
         const parsedUrl = new URL(url);
