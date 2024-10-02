@@ -3,7 +3,7 @@ const path = require('path');
 module.exports = {
     entry: {
         popup: './src/pages/popup.ts',
-        contentScript: './src/content/contentScript.ts',
+        contentScript: './src/content/contentScript.ts'
     },
     output: {
         path: path.resolve(__dirname, 'dist'),

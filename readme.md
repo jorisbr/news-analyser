@@ -1,2 +1,5 @@
 Development:
-`npx webpack --config webpack.config.js`
+`npm run build`
+
+Release:
+`npx webpack --config webpack.config.js --mode production --output-path release`

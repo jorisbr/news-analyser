@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "News Analyser",
-  "description": "This extension allows you to analyse news articles for content features often associated with misinformation.",
+  "default_locale": "nl",
+  "name": "__MSG_extensionName__",
+  "description": "__MSG_extensionDescription__",
   "version": "1.0",
   "permissions": [
     "activeTab",
@@ -73,10 +74,10 @@
         "*://*.volkskrant.nl/*"
       ],
       "js": [
-        "dist/contentScript.js"
+        "/dist/contentScript.js"
       ],
       "css": [
-        "src/styles/styles.css"
+        "/src/styles/styles.css"
       ]
     }
   ],

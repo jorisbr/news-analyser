@@ -1,0 +1,97 @@
+{
+    "extensionName": {
+      "message": "Nieuws Hulp",
+      "description": "The name of the extension"
+    },
+    "extensionDescription": {
+      "message": "Deze extensie stelt je in staat nieuwsartikelen te analyseren op inhoudelijke kenmerken die vaak geassocieerd worden met desinformatie.",
+      "description": "The description of the extension"
+    },
+    "analyseButton": {
+    "message": "Analyseer huidige pagina",
+    "description": "Text for the button to start the analysis"
+    },
+    "assessmentColumnHeader": {
+    "message": "Beoordeling",
+    "description": "Header for the assessment column"
+    },
+    "featureColumnHeader": {
+    "message": "Kenmerk",
+    "description": "Header for the feature column"
+    },
+    "apiKeyInput": {
+      "message": "Voer je ChatGPT API-sleutel in",
+      "description": "Placeholder text for the API key input field"
+    },
+    "saveApiKeyButton": {
+      "message": "API-sleutel opslaan",
+      "description": "Text for the button to save the API key"
+    },
+    "resetApiKeyButton": {
+      "message": "API-sleutel resetten",
+      "description": "Text for the button to reset the API key"
+    },
+    "loadingMessage": {
+      "message": "Bezig met analyseren...",
+      "description": "Message shown during analysis"
+    },
+    "emotionsFeature": {
+      "message": "Gebruik van emoties",
+      "description": "Description of the emotion analysis feature"
+    },
+    "biasFeature": {
+      "message": "Ideologische vooringenomenheid",
+      "description": "Description of the bias analysis feature"
+    },
+    "informalLanguageFeature": {
+      "message": "Informele woorden en taal",
+      "description": "Description of the informal language analysis feature"
+    },
+    "scientificConsensusFeature": {
+      "message": "Feiten in strijd met wetenschappelijke consensus",
+      "description": "Description of the scientific consensus analysis feature"
+    },
+    "expertMisuseFeature": {
+      "message": "Misbruik van experts",
+      "description": "Description of the expert misuse analysis feature"
+    },
+    "notPresent": {
+      "message": "Niet aanwezig",
+      "description": "Indication that a feature is not present"
+    },
+    "somewhatPresent": {
+      "message": "Enigszins aanwezig",
+      "description": "Indication that a feature is somewhat present"
+    },
+    "stronglyPresent": {
+      "message": "Sterk aanwezig",
+      "description": "Indication that a feature is strongly present"
+    },
+    "contextSentence1": {
+      "message": "Er is mogelijk sprake van een minder betrouwbaar artikel, check meerdere bronnen.",
+      "description": "Context sentence for potentially unreliable articles"
+    },
+    "contextSentence2": {
+      "message": "Nieuws is niet altijd volledig neutraal, maar dat wil niet zeggen dat het per definitie onjuist is.",
+      "description": "Context sentence for articles with ideological bias"
+    },
+    "contextSentence3": {
+      "message": "Nieuws is soms niet volledig neutraal en de feiten zijn soms onbekend maar dat betekent niet dat het direct onjuist is.",
+      "description": "Context sentence for articles with bias and potential misuse of experts"
+    },
+    "knowMoreText": {
+      "message": "Wil je meer weten?",
+      "description": "Text for the 'more information' link"
+    },
+    "knowMoreLinkText": {
+      "message": "Bekijk deze webpagina.",
+      "description": "Text for the link to more information"
+    },
+    "knowMoreLink": {
+        "message": "https://wild-merrill-no-name-org-420b310d.koyeb.app/",
+        "description": "Text for the link to more information"
+    },
+    "invalidApiKey": {
+        "message": "Ongeldige API-sleutel. Check of de sleutel correct is ingevoerd."
+    }
+  }

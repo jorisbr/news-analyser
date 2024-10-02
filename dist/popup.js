@@ -12,10 +12,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   analyseWithLLM: () => (/* binding */ analyseWithLLM),
 /* harmony export */   getApiKey: () => (/* binding */ getApiKey),
+/* harmony export */   getContextSentence: () => (/* binding */ getContextSentence),
 /* harmony export */   getDomainNameFromUrl: () => (/* binding */ getDomainNameFromUrl),
 /* harmony export */   hideElement: () => (/* binding */ hideElement),
 /* harmony export */   saveApiKey: () => (/* binding */ saveApiKey),
-/* harmony export */   showElement: () => (/* binding */ showElement)
+/* harmony export */   showElement: () => (/* binding */ showElement),
+/* harmony export */   validateApiKey: () => (/* binding */ validateApiKey)
 /* harmony export */ });
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -68,41 +70,76 @@ function getDomainNameFromUrl(url) {
         return url.hostname;
     }
 }
+function validateApiKey(apiKey) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const openaiEndpoint = 'https://api.openai.com/v1/models';
+        try {
+            const response = yield fetch(openaiEndpoint, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                },
+            });
+            return response.status === 200;
+        }
+        catch (error) {
+            console.error('Error validating API key:', error);
+            return false;
+        }
+    });
+}
+function getContextSentence(analysisResult) {
+    console.log(analysisResult);
+    const redCircle = "strongly present";
+    const yellowCircle = "somewhat present";
+    if (analysisResult["Facts go against scientific consensus"] === redCircle ||
+        analysisResult["Misuse of experts"] === redCircle) {
+        return "contextSentence1";
+    }
+    else if (analysisResult["Ideological bias"] === redCircle) {
+        return "contextSentence2";
+    }
+    else if (analysisResult["Ideological bias"] === redCircle &&
+        analysisResult["Misuse of experts"] === yellowCircle) {
+        return "contextSentence3";
+    }
+    return ""; // Return empty string if no conditions are met
+}
 function analyseWithLLM(html) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
             getApiKey((apiKey) => __awaiter(this, void 0, void 0, function* () {
                 if (!apiKey) {
-                    reject(new Error('API key is not set. Please enter your API key.'));
+                    reject(new Error(chrome.i18n.getMessage('apiKeyNotSet')));
                     return;
                 }
                 const prompt = `You are a news article classifier assessing whether a news article is fake news or not.
 
-                            You should evaluate each news article on three content features:
-                            Use and presence of emotions: Greater use of emotive and affective language. Especially negative emotions typically more present. In news, content contains heavy emotional appeal to readers, provoking fear, anger, outrage.
-                            Ideological bias: (Hyper-)partisan bias, often with a right-leaning ideological orientation. Negative references to left-leaning, progressive political actors or issues, positive references to (populist) right leaning political actors or issues
-                            Informal words and language: More use of informal words and informal language (slang, swear). Higher likelihood of hate speech and incivility.
-                            Facts go against scientific consensus: evidence and claims made go against conventional facts or scientific consensus.
-                            Misuse of experts: Irrelevant or non-legitimate experts are cited who have no knowledge of the topic.
+                You should evaluate each news article on five content features:
+                emotionsFeature: Greater use of emotive and affective language. Especially negative emotions typically more present. In news, content contains heavy emotional appeal to readers, provoking fear, anger, outrage.
+                biasFeature: (Hyper-)partisan bias, often with a right-leaning ideological orientation. Negative references to left-leaning, progressive political actors or issues, positive references to (populist) right leaning political actors or issues.
+                informalLanguageFeature: More use of informal words and informal language (slang, swear). Higher likelihood of hate speech and incivility.
+                scientificConsensusFeature: Evidence and claims made go against conventional facts or scientific consensus.
+                expertMisuseFeature: Irrelevant or non-legitimate experts are cited who have no knowledge of the topic.
 
-                            Give an assessment for each feature expressing to which extent a feature applies, use the following labels:
-                            - not present
-                            - Somewhat present
-                            - Strongly present
-                            return the results as a pure JSON object without any additional text or explanation. The JSON object should have the following structure:
-                            {
-                              "Use and presence of emotions": "label",
-                              "Ideological bias": "label",
-                              "Informal words and language": "label",
-                              "Facts go against scientific consensus": "label",
-                              "Misuse of experts": "label"
-                            }`;
+                Give an assessment for each feature expressing to which extent a feature applies, use the following labels:
+                - notPresent
+                - somewhatPresent
+                - stronglyPresent
+                return the results as a pure JSON object without any additional text or explanation. The JSON object should have the following structure:
+                {
+                  "emotionsFeature": "label",
+                  "biasFeature": "label",
+                  "informalLanguageFeature": "label",
+                  "scientificConsensusFeature": "label",
+                  "expertMisuseFeature": "label"
+                }`;
                 const fullPrompt = `${prompt}\n\nHTML Content:\n${html}`;
                 const openaiEndpoint = 'https://api.openai.com/v1/chat/completions';
                 const requestBody = {
                     model: 'gpt-4o-mini',
                     messages: [{ role: 'user', content: fullPrompt }],
-                    top_p: 0,
+                    top_p: 0.01,
                     seed: 1,
                     response_format: {
                         type: 'json_schema',
@@ -111,18 +148,18 @@ function analyseWithLLM(html) {
                             schema: {
                                 type: 'object',
                                 properties: {
-                                    "Use and presence of emotions": { type: 'string' },
-                                    "Ideological bias": { type: 'string' },
-                                    "Informal words and language": { type: 'string' },
-                                    "Facts go against scientific consensus": { type: 'string' },
-                                    "Misuse of experts": { type: 'string' }
+                                    "emotionsFeature": { type: 'string' },
+                                    "biasFeature": { type: 'string' },
+                                    "informalLanguageFeature": { type: 'string' },
+                                    "scientificConsensusFeature": { type: 'string' },
+                                    "expertMisuseFeature": { type: 'string' }
                                 },
                                 required: [
-                                    "Use and presence of emotions",
-                                    "Ideological bias",
-                                    "Informal words and language",
-                                    "Facts go against scientific consensus",
-                                    "Misuse of experts"
+                                    "emotionsFeature",
+                                    "biasFeature",
+                                    "informalLanguageFeature",
+                                    "scientificConsensusFeature",
+                                    "expertMisuseFeature"
                                 ],
                                 additionalProperties: false
                             },
@@ -151,7 +188,7 @@ function analyseWithLLM(html) {
                 }
                 catch (error) {
                     console.error('Error calling LLM:', error);
-                    reject(new Error('An error occurred while analysing the content.'));
+                    reject(new Error(chrome.i18n.getMessage('analysisError')));
                 }
             }));
         });
@@ -223,11 +260,24 @@ var __webpack_exports__ = {};
   \****************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     const popup = document.getElementById('news-analyser-popup');
     // Initialize event listeners
     initializeEventListeners();
+    // Localize HTML content
+    updateLocalizedContent();
+    // Update UI based on current state
+    updateUIForCurrentState();
     // Prefill the API key if available and show relevant section
     (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.getApiKey)((apiKey) => {
         const apiKeyInput = popup.querySelector('#apiKeyInput');
@@ -240,24 +290,90 @@ document.addEventListener('DOMContentLoaded', () => {
         popup.querySelector('#saveApiKeyButton').addEventListener('click', saveApiKeyHandler);
         popup.querySelector('#resetApiKeyButton').addEventListener('click', resetApiKeyHandler);
         popup.querySelector('#analyseButton').addEventListener('click', analyseButtonHandler);
+        popup.querySelector('#languageSelector').addEventListener('change', languageSelectorHandler);
+    }
+    function loadMessages(lang) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield fetch(chrome.runtime.getURL(`_locales/${lang}/messages.json`));
+            return yield response.json();
+        });
+    }
+    function getCustomMessage(messages, key) {
+        var _a;
+        return ((_a = messages[key]) === null || _a === void 0 ? void 0 : _a.message) || key;
+    }
+    function updateLocalizedContent() {
+        chrome.storage.sync.get('language', function (data) {
+            const lang = data.language || chrome.i18n.getUILanguage();
+            console.log('Update localized content: Language is set to ' + lang);
+            loadMessages(lang).then((messages) => {
+                popup.querySelectorAll('[data-i18n]').forEach(elem => {
+                    const key = elem.getAttribute('data-i18n');
+                    if (key)
+                        elem.textContent = getCustomMessage(messages, key);
+                });
+                popup.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
+                    const key = elem.getAttribute('data-i18n-placeholder');
+                    if (key)
+                        elem.placeholder = getCustomMessage(messages, key);
+                });
+                popup.querySelectorAll('[data-i18n-title]').forEach(elem => {
+                    const key = elem.getAttribute('data-i18n-title');
+                    if (key)
+                        elem.setAttribute('title', getCustomMessage(messages, key));
+                });
+                popup.querySelectorAll('[data-i18n-href]').forEach(elem => {
+                    const key = elem.getAttribute('data-i18n-href');
+                    if (key)
+                        elem.href = getCustomMessage(messages, key);
+                });
+                // Set the language selector to the current language
+                const languageSelector = popup.querySelector('#languageSelector');
+                if (languageSelector) {
+                    Array.from(languageSelector.options).forEach(option => {
+                        if (option.value === lang) {
+                            option.selected = true;
+                        }
+                    });
+                }
+                updateDynamicContent(messages);
+            });
+        });
     }
     function saveApiKeyHandler() {
-        const apiKeyInput = popup.querySelector('#apiKeyInput');
-        const apiKey = apiKeyInput.value.trim();
-        const messageDiv = popup.querySelector('#message');
-        if (apiKey) {
-            (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.saveApiKey)(apiKey);
-            messageDiv.textContent = 'API key saved successfully!';
-            updateUIForAnalysis();
-        }
-        else {
-            messageDiv.textContent = 'Please enter a valid API key.';
-        }
+        return __awaiter(this, void 0, void 0, function* () {
+            const apiKeyInput = popup.querySelector('#apiKeyInput');
+            const apiKey = apiKeyInput.value.trim();
+            const messageDiv = popup.querySelector('#message');
+            const saveButton = popup.querySelector('#saveApiKeyButton');
+            if (apiKey) {
+                saveButton.disabled = true;
+                const isValid = yield (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.validateApiKey)(apiKey);
+                console.log('Is valid:', isValid);
+                if (isValid) {
+                    (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.saveApiKey)(apiKey);
+                    updateUIForAnalysis();
+                }
+                else {
+                    messageDiv.textContent = chrome.i18n.getMessage('invalidApiKey');
+                    updateLocalizedContent();
+                }
+                saveButton.disabled = false;
+            }
+        });
     }
     function resetApiKeyHandler() {
         chrome.storage.local.remove('chatgptApiKey', () => {
             updateUIForApiKeyInput();
-            popup.querySelector('#message').textContent = 'API key has been reset. Please enter a new API key.';
+            popup.querySelector('#message').textContent = chrome.i18n.getMessage('apiKeyReset');
+        });
+    }
+    function languageSelectorHandler(event) {
+        const newLang = event.target.value;
+        chrome.storage.sync.set({ language: newLang }, function () {
+            console.log('Language selector handler Language is set to ' + newLang);
+            updateLocalizedContent();
+            updateUIForCurrentState();
         });
     }
     function analyseButtonHandler() {
@@ -269,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const selector = getSelectorByDomain(url);
             if (!selector) {
                 (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#articlesContent');
-                articlesContentDiv.innerHTML = `<div>This website or subdomain is not supported.</div>`;
+                articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('unsupportedWebsite')}</div>`;
             }
             else {
                 (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#loading');
@@ -280,21 +396,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#articlesContent');
                             if (result && result.content) {
                                 fillResultsTable(result);
+                                updateLocalizedContent();
                             }
                             else {
-                                articlesContentDiv.innerHTML = `<div>The response retrieved was empty</div>`;
+                                articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('emptyResponse')}</div>`;
                             }
                         }).catch((error) => {
                             console.error('Error in analyseWithLLM:', error);
                             (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.hideElement)('#loading');
                             (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#articlesContent');
-                            articlesContentDiv.innerHTML = `<div>Something went wrong: ${error.message}</div>`;
+                            articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('analysisError', error.message)}</div>`;
                         });
                     }
                     else {
                         (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.hideElement)('#loading');
                         (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#articlesContent');
-                        articlesContentDiv.innerHTML = `<div>Failed to extract article content</div>`;
+                        articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('extractionFailed')}</div>`;
                     }
                 });
             }
@@ -310,54 +427,118 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    function updateDynamicContent(messages) {
+        // Update table headers
+        const headers = popup.querySelectorAll('#daResultsTable th');
+        if (headers[0])
+            headers[0].textContent = getCustomMessage(messages, 'featureColumnHeader');
+        if (headers[1])
+            headers[1].textContent = getCustomMessage(messages, 'assessmentColumnHeader');
+        console.log(`messages: ${messages}`);
+        // Update feature names and assessments
+        const features = [
+            'emotionsFeature',
+            'biasFeature',
+            'informalLanguageFeature',
+            'scientificConsensusFeature',
+            'expertMisuseFeature'
+        ];
+        features.forEach(feature => {
+            const featureCell = popup.querySelector(`#daResultsTable td[data-feature="${feature}"]`);
+            const assessmentCell = popup.querySelector(`#daResultsTable td[data-assessment="${feature}"]`);
+            if (featureCell)
+                featureCell.textContent = getCustomMessage(messages, feature);
+            if (assessmentCell) {
+                const assessmentKey = assessmentCell.getAttribute('data-assessment-key');
+                if (assessmentKey) {
+                    const assessmentMessage = getCustomMessage(messages, assessmentKey);
+                    console.log(`assessmentMessage: ${assessmentMessage}`);
+                    console.log(`assessmentKey: ${assessmentKey}`);
+                    console.log(`assessmentCell: ${assessmentCell}`);
+                    console.log(`icon: ${getSvgIcon(assessmentKey)}`);
+                    assessmentCell.innerHTML = `${getSvgIcon(assessmentKey)} ${assessmentMessage}`;
+                }
+            }
+        });
+        // Update context sentence
+        const contextParagraph = popup.querySelector('.context-sentence');
+        if (contextParagraph) {
+            const contextKey = contextParagraph.getAttribute('data-context-key');
+            if (contextKey)
+                contextParagraph.textContent = getCustomMessage(messages, contextKey);
+        }
+    }
+    function updateUIForCurrentState() {
+        (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.getApiKey)((apiKey) => {
+            if (apiKey) {
+                updateUIForAnalysis();
+            }
+            else {
+                updateUIForApiKeyInput();
+            }
+        });
+    }
     function updateUIForAnalysis() {
         (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.hideElement)('#apiKeySection');
         (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#analysisSection');
+        updateLocalizedContent();
     }
     function updateUIForApiKeyInput() {
         (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#apiKeySection');
         (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.hideElement)('#analysisSection');
     }
+    function getSvgIcon(assessmentKey) {
+        const svgIcons = {
+            'notPresent': '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#238823" class="bi bi-circle-fill"><circle cx="8" cy="8" r="8"/></svg>',
+            'somewhatPresent': '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#FFBF00" class="bi bi-circle-fill"><circle cx="8" cy="8" r="8"/></svg>',
+            'stronglyPresent': '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#D2222D" class="bi bi-circle-fill"><circle cx="8" cy="8" r="8"/></svg>'
+        };
+        const k = assessmentKey;
+        return svgIcons[k] || '';
+    }
     function fillResultsTable(data) {
         const resultsTable = document.createElement('table');
         resultsTable.id = 'daResultsTable';
         resultsTable.innerHTML = `
-            <thead>
-                <tr>
-                    <th>Feature</th>
-                    <th>Assessment</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        `;
+        <thead>
+            <tr>
+                <th data-i18n="featureColumnHeader"></th>
+                <th data-i18n="assessmentColumnHeader"></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
         popup.querySelector('#articlesContent').appendChild(resultsTable);
         const resultsTableTBody = resultsTable.getElementsByTagName('tbody')[0];
         resultsTableTBody.innerHTML = ''; // Clear existing rows
         const features = [
-            'Use and presence of emotions',
-            'Ideological bias',
-            'Informal words and language',
-            'Facts go against scientific consensus',
-            'Misuse of experts'
+            'emotionsFeature',
+            'biasFeature',
+            'informalLanguageFeature',
+            'scientificConsensusFeature',
+            'expertMisuseFeature'
         ];
-        const svgIcons = {
-            'not present': '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#238823" class="bi bi-circle-fill"><circle cx="8" cy="8" r="8"/></svg>',
-            'somewhat present': '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#FFBF00" class="bi bi-circle-fill"><circle cx="8" cy="8" r="8"/></svg>',
-            'strongly present': '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#D2222D" class="bi bi-circle-fill"><circle cx="8" cy="8" r="8"/></svg>'
-        };
+        const parsedData = JSON.parse(data.content);
         features.forEach(feature => {
             const row = document.createElement('tr');
             const featureCell = document.createElement('td');
             const assessmentCell = document.createElement('td');
-            featureCell.textContent = feature;
-            const parsedData = JSON.parse(data.content);
-            const assessment = parsedData[feature];
-            const assessmentKey = assessment.toLowerCase();
-            assessmentCell.innerHTML = `${svgIcons[assessmentKey]} ${assessment}`;
+            featureCell.setAttribute('data-feature', feature);
+            assessmentCell.setAttribute('data-assessment', feature);
+            const assessmentKey = parsedData[feature];
+            assessmentCell.setAttribute('data-assessment-key', assessmentKey);
+            // assessmentCell.innerHTML = `${icon} ${} `;
             row.appendChild(featureCell);
             row.appendChild(assessmentCell);
             resultsTableTBody.appendChild(row);
         });
+        const contextSentence = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.getContextSentence)(parsedData);
+        if (contextSentence) {
+            const contextParagraph = document.createElement('p');
+            contextParagraph.setAttribute('data-context-key', contextSentence);
+            contextParagraph.className = 'context-sentence';
+            popup.querySelector('#articlesContent').appendChild(contextParagraph);
+        }
         const cost = data.outputTokens * 0.0000006 + data.inputTokens * 0.00000015;
         console.log(`Estimated cost: ${cost}`);
     }

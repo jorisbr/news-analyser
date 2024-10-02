@@ -49,6 +49,41 @@ export function getDomainNameFromUrl(url) {
         return url.hostname;
     }
 }
+export function validateApiKey(apiKey) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const openaiEndpoint = 'https://api.openai.com/v1/models';
+        try {
+            const response = yield fetch(openaiEndpoint, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                },
+            });
+            return response.status === 200;
+        }
+        catch (error) {
+            console.error('Error validating API key:', error);
+            return false;
+        }
+    });
+}
+export function getContextSentence(analysisResult) {
+    console.log(analysisResult);
+    const redCircle = "strongly present";
+    const yellowCircle = "somewhat present";
+    if (analysisResult["Facts go against scientific consensus"] === redCircle ||
+        analysisResult["Misuse of experts"] === redCircle) {
+        return "Er is mogelijk sprake van een minder betrouwbaar artikel, check meerdere bronnen.";
+    }
+    else if (analysisResult["Ideological bias"] === redCircle) {
+        return "Nieuws is niet altijd volledig neutraal, maar dat wil niet zeggen dat het per definitie onjuist is.";
+    }
+    else if (analysisResult["Ideological bias"] === redCircle &&
+        analysisResult["Misuse of experts"] === yellowCircle) {
+        return "Nieuws is soms niet volledig neutraal en de feiten zijn soms onbekend maar dat betekent niet dat het direct onjuist is.";
+    }
+    return ""; // Return empty string if no conditions are met
+}
 export function analyseWithLLM(html) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {

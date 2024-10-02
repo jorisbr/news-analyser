@@ -39,6 +39,7 @@ td svg {
     vertical-align: middle;
     border: 1px solid #ddd;
     padding: 8px;
+    max-width: 150px;
 }
 
 #news-analyser-popup #daResultsTable th {
@@ -48,6 +49,12 @@ td svg {
     background-color: var(--prussian-blue);
     color: white;
 }
+
+#news-analyser-popup .context-sentence {
+    margin-top: 15px;
+    color: var(--prussian-blue);
+    text-align: center;
+  }
 
 #news-analyser-popup #resultsWindow {
     border-radius: 20px;
@@ -131,6 +138,11 @@ body#news-analyser-popup {
     flex-direction: column;
     margin-top: 20px;
 }
+
+#news-analyser-popup .validation-message {
+    margin-top: 10px;
+    color: var(--accent-color);
+  }
 
 #news-analyser-popup #analysisSection {
     display: flex;

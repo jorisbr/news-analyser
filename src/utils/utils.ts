@@ -1,6 +1,6 @@
 // Utility function to save the API key to Chrome storage
 export function saveApiKey(apiKey: string): void {
-    chrome.storage.local.set({ chatgptApiKey: apiKey }, () => {});
+    chrome.storage.local.set({ chatgptApiKey: apiKey }, () => { });
 }
 
 // Utility function to get the API key from Chrome storage
@@ -42,35 +42,68 @@ export function getDomainNameFromUrl(url: URL): string {
     }
 }
 
+export async function validateApiKey(apiKey: string): Promise<boolean> {
+    const openaiEndpoint = 'https://api.openai.com/v1/models';
+    try {
+        const response = await fetch(openaiEndpoint, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+            },
+        });
+        return response.status === 200;
+    } catch (error) {
+        console.error('Error validating API key:', error);
+        return false;
+    }
+}
+
+export function getContextSentence(analysisResult: any): string {
+    console.log(analysisResult);
+    const redCircle = "strongly present";
+    const yellowCircle = "somewhat present";
+
+    if (analysisResult["Facts go against scientific consensus"] === redCircle ||
+        analysisResult["Misuse of experts"] === redCircle) {
+        return "contextSentence1";
+    } else if (analysisResult["Ideological bias"] === redCircle) {
+        return "contextSentence2";
+    } else if (analysisResult["Ideological bias"] === redCircle &&
+        analysisResult["Misuse of experts"] === yellowCircle) {
+        return "contextSentence3";
+    }
+    return ""; // Return empty string if no conditions are met
+}
+
 export async function analyseWithLLM(html: string): Promise<{ content: string, inputTokens: number, outputTokens: number }> {
     return new Promise((resolve, reject) => {
         getApiKey(async (apiKey) => {
             if (!apiKey) {
-                reject(new Error('API key is not set. Please enter your API key.'));
+                reject(new Error(chrome.i18n.getMessage('apiKeyNotSet')));
                 return;
             }
 
             const prompt = `You are a news article classifier assessing whether a news article is fake news or not.
 
-                            You should evaluate each news article on three content features:
-                            Use and presence of emotions: Greater use of emotive and affective language. Especially negative emotions typically more present. In news, content contains heavy emotional appeal to readers, provoking fear, anger, outrage.
-                            Ideological bias: (Hyper-)partisan bias, often with a right-leaning ideological orientation. Negative references to left-leaning, progressive political actors or issues, positive references to (populist) right leaning political actors or issues
-                            Informal words and language: More use of informal words and informal language (slang, swear). Higher likelihood of hate speech and incivility.
-                            Facts go against scientific consensus: evidence and claims made go against conventional facts or scientific consensus.
-                            Misuse of experts: Irrelevant or non-legitimate experts are cited who have no knowledge of the topic.
+                You should evaluate each news article on five content features:
+                emotionsFeature: Greater use of emotive and affective language. Especially negative emotions typically more present. In news, content contains heavy emotional appeal to readers, provoking fear, anger, outrage.
+                biasFeature: (Hyper-)partisan bias, often with a right-leaning ideological orientation. Negative references to left-leaning, progressive political actors or issues, positive references to (populist) right leaning political actors or issues.
+                informalLanguageFeature: More use of informal words and informal language (slang, swear). Higher likelihood of hate speech and incivility.
+                scientificConsensusFeature: Evidence and claims made go against conventional facts or scientific consensus.
+                expertMisuseFeature: Irrelevant or non-legitimate experts are cited who have no knowledge of the topic.
 
-                            Give an assessment for each feature expressing to which extent a feature applies, use the following labels:
-                            - not present
-                            - Somewhat present
-                            - Strongly present
-                            return the results as a pure JSON object without any additional text or explanation. The JSON object should have the following structure:
-                            {
-                              "Use and presence of emotions": "label",
-                              "Ideological bias": "label",
-                              "Informal words and language": "label",
-                              "Facts go against scientific consensus": "label",
-                              "Misuse of experts": "label"
-                            }`;
+                Give an assessment for each feature expressing to which extent a feature applies, use the following labels:
+                - notPresent
+                - somewhatPresent
+                - stronglyPresent
+                return the results as a pure JSON object without any additional text or explanation. The JSON object should have the following structure:
+                {
+                  "emotionsFeature": "label",
+                  "biasFeature": "label",
+                  "informalLanguageFeature": "label",
+                  "scientificConsensusFeature": "label",
+                  "expertMisuseFeature": "label"
+                }`;
 
             const fullPrompt = `${prompt}\n\nHTML Content:\n${html}`;
 
@@ -78,7 +111,7 @@ export async function analyseWithLLM(html: string): Promise<{ content: string, i
             const requestBody = {
                 model: 'gpt-4o-mini',
                 messages: [{ role: 'user', content: fullPrompt }],
-                top_p: 0,
+                top_p: 0.01,
                 seed: 1,
                 response_format: {
                     type: 'json_schema',
@@ -87,18 +120,18 @@ export async function analyseWithLLM(html: string): Promise<{ content: string, i
                         schema: {
                             type: 'object',
                             properties: {
-                                "Use and presence of emotions": { type: 'string' },
-                                "Ideological bias": { type: 'string' },
-                                "Informal words and language": { type: 'string' },
-                                "Facts go against scientific consensus": { type: 'string' },
-                                "Misuse of experts": { type: 'string' }
+                                "emotionsFeature": { type: 'string' },
+                                "biasFeature": { type: 'string' },
+                                "informalLanguageFeature": { type: 'string' },
+                                "scientificConsensusFeature": { type: 'string' },
+                                "expertMisuseFeature": { type: 'string' }
                             },
                             required: [
-                                "Use and presence of emotions",
-                                "Ideological bias",
-                                "Informal words and language",
-                                "Facts go against scientific consensus",
-                                "Misuse of experts"
+                                "emotionsFeature",
+                                "biasFeature",
+                                "informalLanguageFeature",
+                                "scientificConsensusFeature",
+                                "expertMisuseFeature"
                             ],
                             additionalProperties: false
                         },
@@ -129,7 +162,7 @@ export async function analyseWithLLM(html: string): Promise<{ content: string, i
                 });
             } catch (error) {
                 console.error('Error calling LLM:', error);
-                reject(new Error('An error occurred while analysing the content.'));
+                reject(new Error(chrome.i18n.getMessage('analysisError')));
             }
         });
     });

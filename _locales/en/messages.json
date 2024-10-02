@@ -1,0 +1,109 @@
+{
+    "extensionName": {
+        "message": "News Analyser",
+        "description": "The name of the extension"
+    },
+    "extensionDescription": {
+        "message": "This extension allows you to analyse news articles for content features often associated with misinformation.",
+        "description": "The description of the extension"
+    },
+    "analyseButton": {
+        "message": "Analyse current page",
+        "description": "Text for the button to start the analysis"
+    },
+    "featureColumnHeader": {
+        "message": "Feature",
+        "description": "Header for the feature column in the analysis results"
+    },
+    "assessmentColumnHeader": {
+        "message": "Assessment",
+        "description": "Header for the assessment column in the analysis results"
+    },
+    "apiKeyInput": {
+        "message": "Enter your ChatGPT API key",
+        "description": "Placeholder text for the API key input field"
+    },
+    "saveApiKeyButton": {
+        "message": "Save API Key",
+        "description": "Text for the button to save the API key"
+    },
+    "resetApiKeyButton": {
+        "message": "Reset API Key",
+        "description": "Text for the button to reset the API key"
+    },
+    "loadingMessage": {
+        "message": "Analysing...",
+        "description": "Message shown during analysis"
+    },
+    "emotionsFeature": {
+        "message": "Use and presence of emotions",
+        "description": "Description of the emotion analysis feature"
+    },
+    "biasFeature": {
+        "message": "Ideological bias",
+        "description": "Description of the bias analysis feature"
+    },
+    "informalLanguageFeature": {
+        "message": "Informal words and language",
+        "description": "Description of the informal language analysis feature"
+    },
+    "scientificConsensusFeature": {
+        "message": "Facts go against scientific consensus",
+        "description": "Description of the scientific consensus analysis feature"
+    },
+    "expertMisuseFeature": {
+        "message": "Misuse of experts",
+        "description": "Description of the expert misuse analysis feature"
+    },
+    "notPresent": {
+        "message": "Not present",
+        "description": "Indication that a feature is not present"
+    },
+    "somewhatPresent": {
+        "message": "Somewhat present",
+        "description": "Indication that a feature is somewhat present"
+    },
+    "stronglyPresent": {
+        "message": "Strongly present",
+        "description": "Indication that a feature is strongly present"
+    },
+    "contextSentence1": {
+        "message": "This article may be less reliable, check multiple sources.",
+        "description": "Context sentence for potentially unreliable articles"
+    },
+    "contextSentence2": {
+        "message": "News is not always completely neutral, but that doesn't necessarily mean it's incorrect.",
+        "description": "Context sentence for articles with ideological bias"
+    },
+    "contextSentence3": {
+        "message": "News is sometimes not fully neutral and facts are sometimes unknown, but that doesn't mean it's immediately incorrect.",
+        "description": "Context sentence for articles with bias and potential misuse of experts"
+    },
+    "knowMoreText": {
+        "message": "Want to know more?",
+        "description": "Text for the 'more information' link"
+    },
+    "knowMoreLinkText": {
+        "message": "Check out this web page.",
+        "description": "Text for the link to more information"
+    },
+    "knowMoreLink": {
+        "message": "https://wild-merrill-no-name-org-420b310d.koyeb.app/en",
+        "description": "Text for the link to more information"
+    },
+    "apiKeyNotSet": {
+        "message": "API key is not set. Please enter your API key.",
+        "description": "Error message when API key is not set"
+    },
+    "analysisPrompt": {
+        "message": "You are a news article classifier assessing whether a news article is fake news or not.\n\nYou should evaluate each news article on three content features:\nUse and presence of emotions: Greater use of emotive and affective language. Especially negative emotions typically more present. In news, content contains heavy emotional appeal to readers, provoking fear, anger, outrage.\nIdeological bias: (Hyper-)partisan bias, often with a right-leaning ideological orientation. Negative references to left-leaning, progressive political actors or issues, positive references to (populist) right leaning political actors or issues\nInformal words and language: More use of informal words and informal language (slang, swear). Higher likelihood of hate speech and incivility.\nFacts go against scientific consensus: evidence and claims made go against conventional facts or scientific consensus.\nMisuse of experts: Irrelevant or non-legitimate experts are cited who have no knowledge of the topic.\n\nGive an assessment for each feature expressing to which extent a feature applies, use the following labels:\n- not present\n- Somewhat present\n- Strongly present\nreturn the results as a pure JSON object without any additional text or explanation. The JSON object should have the following structure:\n{\n  \"Use and presence of emotions\": \"label\",\n  \"Ideological bias\": \"label\",\n  \"Informal words and language\": \"label\",\n  \"Facts go against scientific consensus\": \"label\",\n  \"Misuse of experts\": \"label\"\n}",
+        "description": "Prompt for the news article analysis"
+    },
+    "analysisError": {
+        "message": "An error occurred while analysing the content.",
+        "description": "Error message when analysis fails"
+    },
+    "invalidApiKey": {
+        "message": "Invalid API key, please check and try again."
+    }
+}
