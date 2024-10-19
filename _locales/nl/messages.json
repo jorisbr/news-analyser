@@ -4,7 +4,7 @@
       "description": "The name of the extension"
     },
     "extensionDescription": {
-      "message": "Deze extensie stelt je in staat nieuwsartikelen te analyseren op inhoudelijke kenmerken die vaak geassocieerd worden met desinformatie.",
+      "message": "Deze extensie helpt nieuwsartikelen te analyseren op inhoudelijke kenmerken die vaak geassocieerd worden met desinformatie.",
       "description": "The description of the extension"
     },
     "analyseButton": {
@@ -45,15 +45,15 @@
     },
     "informalLanguageFeature": {
       "message": "Informele woorden en taal",
-      "description": "Description of the informal language analysis feature"
+      "description": "Description of the informal language feature"
     },
     "scientificConsensusFeature": {
       "message": "Feiten in strijd met wetenschappelijke consensus",
-      "description": "Description of the scientific consensus analysis feature"
+      "description": "Description of the scientific consensus feature"
     },
     "expertMisuseFeature": {
       "message": "Misbruik van experts",
-      "description": "Description of the expert misuse analysis feature"
+      "description": "Description of the expert misuse feature"
     },
     "notPresent": {
       "message": "Niet aanwezig",
@@ -67,17 +67,9 @@
       "message": "Sterk aanwezig",
       "description": "Indication that a feature is strongly present"
     },
-    "contextSentence1": {
-      "message": "Er is mogelijk sprake van een minder betrouwbaar artikel, check meerdere bronnen.",
-      "description": "Context sentence for potentially unreliable articles"
-    },
-    "contextSentence2": {
-      "message": "Nieuws is niet altijd volledig neutraal, maar dat wil niet zeggen dat het per definitie onjuist is.",
-      "description": "Context sentence for articles with ideological bias"
-    },
-    "contextSentence3": {
-      "message": "Nieuws is soms niet volledig neutraal en de feiten zijn soms onbekend maar dat betekent niet dat het direct onjuist is.",
-      "description": "Context sentence for articles with bias and potential misuse of experts"
+    "contextSentence": {
+      "message": "Volgens het Nederlandse Commissariaat voor de Media houdt deze bron zich aan journalistieke standaarden",
+      "description": "Context sentence for reliable sources"
     },
     "knowMoreText": {
       "message": "Wil je meer weten?",

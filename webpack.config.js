@@ -2,6 +2,7 @@ const path = require('path');
 
 module.exports = {
     entry: {
+        utils: './src/utils/utils.ts',
         popup: './src/pages/popup.ts',
         contentScript: './src/content/contentScript.ts'
     },

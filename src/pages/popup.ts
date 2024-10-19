@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
         popup.querySelector('#resetApiKeyButton')!.addEventListener('click', resetApiKeyHandler);
         popup.querySelector('#analyseButton')!.addEventListener('click', analyseButtonHandler);
         popup.querySelector('#languageSelector')!.addEventListener('change', languageSelectorHandler);
+
+        // Add listener for info icon clicks
+        document.addEventListener('click', handleInfoIconClick);
     }
 
     async function loadMessages(lang: string): Promise<{ [key: string]: { message: string } }> {
@@ -37,10 +40,29 @@ document.addEventListener('DOMContentLoaded', () => {
         return messages[key]?.message || key;
     }
 
+    async function handleInfoIconClick(event: MouseEvent) {
+        const target = event.target as HTMLElement;
+        if (target.classList.contains('info-icon')) {
+            event.stopPropagation();
+            const explanationBox = document.getElementById('explanationBox');
+            const lang = await getCurrentLanguage();
+            const explanation = target.getAttribute(`data-explanation-${lang === 'nl' ? 'nl' : 'en'}`);
+
+            if (explanationBox && explanation) {
+                explanationBox.textContent = explanation;
+            }
+            showElement('#explanationBox');
+        }
+    }
+
+    async function getCurrentLanguage(): Promise<string> {
+        const data = await chrome.storage.sync.get('language');
+        return data.language || chrome.i18n.getUILanguage();
+    }
+
     function updateLocalizedContent() {
-        chrome.storage.sync.get('language', function (data) {
-            const lang = data.language || chrome.i18n.getUILanguage();
-            console.log('Update localized content: Language is set to ' + lang);
+        chrome.storage.sync.get('language', async function () {
+            const lang = await getCurrentLanguage();
 
             loadMessages(lang).then((messages) => {
                 popup.querySelectorAll('[data-i18n]').forEach(elem => {
@@ -89,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
             saveButton.disabled = true;
 
             const isValid = await validateApiKey(apiKey);
-            console.log('Is valid:', isValid);
             if (isValid) {
                 saveApiKey(apiKey);
                 updateUIForAnalysis();
@@ -112,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function languageSelectorHandler(event: Event) {
         const newLang = (event.target as HTMLSelectElement).value;
         chrome.storage.sync.set({ language: newLang }, function () {
-            console.log('Language selector handler Language is set to ' + newLang);
             updateLocalizedContent();
             updateUIForCurrentState();
         });
@@ -136,13 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             hideElement('#loading');
                             showElement('#articlesContent');
                             if (result && result.content) {
-                                fillResultsTable(result);
+                                fillResultsTable(result, getDomainNameFromUrl(new URL(url)));
                                 updateLocalizedContent();
                             } else {
                                 articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('emptyResponse')}</div>`;
                             }
                         }).catch((error) => {
-                            console.error('Error in analyseWithLLM:', error);
                             hideElement('#loading');
                             showElement('#articlesContent');
                             articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('analysisError', error.message)}</div>`;
@@ -172,7 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const headers = popup.querySelectorAll('#daResultsTable th');
         if (headers[0]) headers[0].textContent = getCustomMessage(messages, 'featureColumnHeader');
         if (headers[1]) headers[1].textContent = getCustomMessage(messages, 'assessmentColumnHeader');
-        console.log(`messages: ${messages}`);
 
         // Update feature names and assessments
         const features = [
@@ -192,14 +210,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const assessmentKey = assessmentCell.getAttribute('data-assessment-key');
                 if (assessmentKey) {
                     const assessmentMessage = getCustomMessage(messages, assessmentKey);
-                    console.log(`assessmentMessage: ${assessmentMessage}`);
-                    console.log(`assessmentKey: ${assessmentKey}`);
-                    console.log(`assessmentCell: ${assessmentCell}`);
-                    console.log(`icon: ${getSvgIcon(assessmentKey)}`);
-                    assessmentCell.innerHTML = `${getSvgIcon(assessmentKey)} ${assessmentMessage}`;
+                    const infoIcon = assessmentCell.querySelector('.info-icon');
+
+                    // Preserve the info icon if it exists
+                    if (infoIcon) {
+                        assessmentCell.innerHTML = `${getSvgIcon(assessmentKey)} ${assessmentMessage} `;
+                        assessmentCell.appendChild(infoIcon);
+                    } else {
+                        assessmentCell.innerHTML = `${getSvgIcon(assessmentKey)} ${assessmentMessage}`;
+                    }
                 }
             }
         });
+
+        // Update explanation box
+        const explanationBox = popup.querySelector('#explanationBox');
+        if (explanationBox) {
+            const explanationKey = explanationBox.getAttribute('data-explanation-key');
+            if (explanationKey) explanationBox.textContent = getCustomMessage(messages, explanationKey);
+        }
 
         // Update context sentence
         const contextParagraph = popup.querySelector('.context-sentence');
@@ -241,7 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return svgIcons[k] || '';
     }
 
-    function fillResultsTable(data: { content: string, inputTokens: number, outputTokens: number }) {
+    function fillResultsTable(data: { content: string, inputTokens: number, outputTokens: number }, domain: string) {
+        hideElement('#explanationBox');
         const resultsTable = document.createElement('table');
         resultsTable.id = 'daResultsTable';
         resultsTable.innerHTML = `
@@ -279,17 +309,28 @@ document.addEventListener('DOMContentLoaded', () => {
             featureCell.setAttribute('data-feature', feature);
             assessmentCell.setAttribute('data-assessment', feature);
 
-            const assessmentKey = parsedData[feature];
+            const assessmentKey = parsedData[feature]['assessment'];
             assessmentCell.setAttribute('data-assessment-key', assessmentKey);
 
-            // assessmentCell.innerHTML = `${icon} ${} `;
+            const dutchExplanation = parsedData[feature]['dutchExplanation'];
+            const englishExplanation = parsedData[feature]['englishExplanation'];
+
+            // Create info icon
+            const infoIcon = document.createElement('span');
+            infoIcon.className = 'info-icon';
+            infoIcon.textContent = 'ℹ️';
+            infoIcon.setAttribute('data-explanation-nl', dutchExplanation);
+            infoIcon.setAttribute('data-explanation-en', englishExplanation);
+
+            assessmentCell.appendChild(document.createTextNode(' ')); // Add a space
+            assessmentCell.appendChild(infoIcon);
 
             row.appendChild(featureCell);
             row.appendChild(assessmentCell);
             resultsTableTBody.appendChild(row);
         });
 
-        const contextSentence = getContextSentence(parsedData);
+        const contextSentence = getContextSentence(domain);
         if (contextSentence) {
             const contextParagraph = document.createElement('p');
             contextParagraph.setAttribute('data-context-key', contextSentence);
@@ -298,7 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const cost = data.outputTokens * 0.0000006 + data.inputTokens * 0.00000015
-        console.log(`Estimated cost: ${cost}`)
     }
 
     function getSelectorByDomain(url: string): string | undefined {

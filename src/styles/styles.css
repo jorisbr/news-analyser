@@ -23,8 +23,23 @@
 
 td svg {
     vertical-align: text-top;
-  }
+}
 
+#news-analyser-popup .info-icon {
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+#news-analyser-popup .explanation-box {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: var(--prussian-blue);
+    color: white;
+    border-radius: 4px;
+    font-size: 14px;
+    max-height: 100px;
+    overflow-y: auto;
+}
 
 #news-analyser-popup #daResultsTable {
     border-collapse: collapse;

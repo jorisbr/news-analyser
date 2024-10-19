@@ -13,11 +13,11 @@
     },
     "featureColumnHeader": {
         "message": "Feature",
-        "description": "Header for the feature column in the analysis results"
+        "description": "Header for the feature column in the analysis"
     },
     "assessmentColumnHeader": {
         "message": "Assessment",
-        "description": "Header for the assessment column in the analysis results"
+        "description": "Header for the assessment column in the analysis"
     },
     "apiKeyInput": {
         "message": "Enter your ChatGPT API key",
@@ -45,15 +45,15 @@
     },
     "informalLanguageFeature": {
         "message": "Informal words and language",
-        "description": "Description of the informal language analysis feature"
+        "description": "Description of the informal language feature"
     },
     "scientificConsensusFeature": {
         "message": "Facts go against scientific consensus",
-        "description": "Description of the scientific consensus analysis feature"
+        "description": "Description of the scientific consensus feature"
     },
     "expertMisuseFeature": {
         "message": "Misuse of experts",
-        "description": "Description of the expert misuse analysis feature"
+        "description": "Description of the expert misuse feature"
     },
     "notPresent": {
         "message": "Not present",
@@ -67,17 +67,9 @@
         "message": "Strongly present",
         "description": "Indication that a feature is strongly present"
     },
-    "contextSentence1": {
-        "message": "This article may be less reliable, check multiple sources.",
-        "description": "Context sentence for potentially unreliable articles"
-    },
-    "contextSentence2": {
-        "message": "News is not always completely neutral, but that doesn't necessarily mean it's incorrect.",
-        "description": "Context sentence for articles with ideological bias"
-    },
-    "contextSentence3": {
-        "message": "News is sometimes not fully neutral and facts are sometimes unknown, but that doesn't mean it's immediately incorrect.",
-        "description": "Context sentence for articles with bias and potential misuse of experts"
+    "contextSentence": {
+        "message": "According to the Dutch commisariat of the media this source upholds journalistic standards",
+        "description": "Context sentence for reliable sources"
     },
     "knowMoreText": {
         "message": "Want to know more?",

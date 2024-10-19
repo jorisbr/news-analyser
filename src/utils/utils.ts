@@ -53,26 +53,33 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
         });
         return response.status === 200;
     } catch (error) {
-        console.error('Error validating API key:', error);
         return false;
     }
 }
 
-export function getContextSentence(analysisResult: any): string {
-    console.log(analysisResult);
-    const redCircle = "strongly present";
-    const yellowCircle = "somewhat present";
+// Define the establishedSources variable
+const establishedSources: string[] = [
+    'ad',
+    'apnews',
+    'bbc',
+    'cnn',
+    'fd',
+    'gelderlander',
+    'nos',
+    'nrc',
+    'nu',
+    'parool',
+    'telegraaf',
+    'trouw',
+    'volkskrant'
+];
 
-    if (analysisResult["Facts go against scientific consensus"] === redCircle ||
-        analysisResult["Misuse of experts"] === redCircle) {
-        return "contextSentence1";
-    } else if (analysisResult["Ideological bias"] === redCircle) {
-        return "contextSentence2";
-    } else if (analysisResult["Ideological bias"] === redCircle &&
-        analysisResult["Misuse of experts"] === yellowCircle) {
-        return "contextSentence3";
-    }
-    return ""; // Return empty string if no conditions are met
+// Utility function to provide an additional sentence explaining the context of the analysis
+export function getContextSentence(domain: string): string {
+    if (establishedSources.includes(domain)) {
+        return "contextSentence";
+    };
+    return "";
 }
 
 export async function analyseWithLLM(html: string): Promise<{ content: string, inputTokens: number, outputTokens: number }> {
@@ -96,13 +103,13 @@ export async function analyseWithLLM(html: string): Promise<{ content: string, i
                 - notPresent
                 - somewhatPresent
                 - stronglyPresent
-                return the results as a pure JSON object without any additional text or explanation. The JSON object should have the following structure:
+                return the results as a pure JSON object listing each content feature the associated assesment and a brief explanation of the assesment in both dutch and english. The JSON object should have the following structure:
                 {
-                  "emotionsFeature": "label",
-                  "biasFeature": "label",
-                  "informalLanguageFeature": "label",
-                  "scientificConsensusFeature": "label",
-                  "expertMisuseFeature": "label"
+                  "emotionsFeature": { "assessment": "label", "dutchExplanation": "brief explanation", "englishExplanation": "brief explanation" },
+                  "biasFeature": { "assessment": "label", "dutchExplanation": "brief explanation", "englishExplanation": "brief explanation" },
+                  "informalLanguageFeature": { "assessment": "label", "dutchExplanation": "brief explanation", "englishExplanation": "brief explanation" },
+                  "scientificConsensusFeature": { "assessment": "label", "dutchExplanation": "brief explanation", "englishExplanation": "brief explanation" },
+                  "expertMisuseFeature": { "assessment": "label", "dutchExplanation": "brief explanation", "englishExplanation": "brief explanation" }
                 }`;
 
             const fullPrompt = `${prompt}\n\nHTML Content:\n${html}`;
@@ -120,11 +127,56 @@ export async function analyseWithLLM(html: string): Promise<{ content: string, i
                         schema: {
                             type: 'object',
                             properties: {
-                                "emotionsFeature": { type: 'string' },
-                                "biasFeature": { type: 'string' },
-                                "informalLanguageFeature": { type: 'string' },
-                                "scientificConsensusFeature": { type: 'string' },
-                                "expertMisuseFeature": { type: 'string' }
+                                "emotionsFeature": {
+                                    type: 'object',
+                                    properties: {
+                                        assessment: { type: 'string', enum: ['notPresent', 'somewhatPresent', 'stronglyPresent'] },
+                                        dutchExplanation: { type: 'string' },
+                                        englishExplanation: { type: 'string' }
+                                    },
+                                    required: ['assessment', 'dutchExplanation', 'englishExplanation'],
+                                    additionalProperties: false
+                                },
+                                "biasFeature": {
+                                    type: 'object',
+                                    properties: {
+                                        assessment: { type: 'string', enum: ['notPresent', 'somewhatPresent', 'stronglyPresent'] },
+                                        dutchExplanation: { type: 'string' },
+                                        englishExplanation: { type: 'string' }
+                                    },
+                                    required: ['assessment', 'dutchExplanation', 'englishExplanation'],
+                                    additionalProperties: false
+                                },
+                                "informalLanguageFeature": {
+                                    type: 'object',
+                                    properties: {
+                                        assessment: { type: 'string', enum: ['notPresent', 'somewhatPresent', 'stronglyPresent'] },
+                                        dutchExplanation: { type: 'string' },
+                                        englishExplanation: { type: 'string' }
+                                    },
+                                    required: ['assessment', 'dutchExplanation', 'englishExplanation'],
+                                    additionalProperties: false
+                                },
+                                "scientificConsensusFeature": {
+                                    type: 'object',
+                                    properties: {
+                                        assessment: { type: 'string', enum: ['notPresent', 'somewhatPresent', 'stronglyPresent'] },
+                                        dutchExplanation: { type: 'string' },
+                                        englishExplanation: { type: 'string' }
+                                    },
+                                    required: ['assessment', 'dutchExplanation', 'englishExplanation'],
+                                    additionalProperties: false
+                                },
+                                "expertMisuseFeature": {
+                                    type: 'object',
+                                    properties: {
+                                        assessment: { type: 'string', enum: ['notPresent', 'somewhatPresent', 'stronglyPresent'] },
+                                        dutchExplanation: { type: 'string' },
+                                        englishExplanation: { type: 'string' }
+                                    },
+                                    required: ['assessment', 'dutchExplanation', 'englishExplanation'],
+                                    additionalProperties: false
+                                }
                             },
                             required: [
                                 "emotionsFeature",
@@ -153,7 +205,6 @@ export async function analyseWithLLM(html: string): Promise<{ content: string, i
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
                 const data = await response.json();
                 resolve({
                     content: data.choices[0].message.content,
@@ -161,7 +212,6 @@ export async function analyseWithLLM(html: string): Promise<{ content: string, i
                     outputTokens: data.usage.completion_tokens
                 });
             } catch (error) {
-                console.error('Error calling LLM:', error);
                 reject(new Error(chrome.i18n.getMessage('analysisError')));
             }
         });

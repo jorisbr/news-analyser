@@ -83,27 +83,33 @@ function validateApiKey(apiKey) {
             return response.status === 200;
         }
         catch (error) {
-            console.error('Error validating API key:', error);
             return false;
         }
     });
 }
-function getContextSentence(analysisResult) {
-    console.log(analysisResult);
-    const redCircle = "strongly present";
-    const yellowCircle = "somewhat present";
-    if (analysisResult["Facts go against scientific consensus"] === redCircle ||
-        analysisResult["Misuse of experts"] === redCircle) {
-        return "contextSentence1";
+// Define the establishedSources variable
+const establishedSources = [
+    'ad',
+    'apnews',
+    'bbc',
+    'cnn',
+    'fd',
+    'gelderlander',
+    'nos',
+    'nrc',
+    'nu',
+    'parool',
+    'telegraaf',
+    'trouw',
+    'volkskrant'
+];
+// Utility function to provide an additional sentence explaining the context of the analysis
+function getContextSentence(domain) {
+    if (establishedSources.includes(domain)) {
+        return "contextSentence";
     }
-    else if (analysisResult["Ideological bias"] === redCircle) {
-        return "contextSentence2";
-    }
-    else if (analysisResult["Ideological bias"] === redCircle &&
-        analysisResult["Misuse of experts"] === yellowCircle) {
-        return "contextSentence3";
-    }
-    return ""; // Return empty string if no conditions are met
+    ;
+    return "";
 }
 function analyseWithLLM(html) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -126,13 +132,13 @@ function analyseWithLLM(html) {
                 - notPresent
                 - somewhatPresent
                 - stronglyPresent
-                return the results as a pure JSON object without any additional text or explanation. The JSON object should have the following structure:
+                return the results as a pure JSON object listing each content feature the associated assesment and a brief explanation of the assesment in both dutch and english. The JSON object should have the following structure:
                 {
-                  "emotionsFeature": "label",
-                  "biasFeature": "label",
-                  "informalLanguageFeature": "label",
-                  "scientificConsensusFeature": "label",
-                  "expertMisuseFeature": "label"
+                  "emotionsFeature": { "assessment": "label", "dutchExplanation": "brief explanation", "englishExplanation": "brief explanation" },
+                  "biasFeature": { "assessment": "label", "dutchExplanation": "brief explanation", "englishExplanation": "brief explanation" },
+                  "informalLanguageFeature": { "assessment": "label", "dutchExplanation": "brief explanation", "englishExplanation": "brief explanation" },
+                  "scientificConsensusFeature": { "assessment": "label", "dutchExplanation": "brief explanation", "englishExplanation": "brief explanation" },
+                  "expertMisuseFeature": { "assessment": "label", "dutchExplanation": "brief explanation", "englishExplanation": "brief explanation" }
                 }`;
                 const fullPrompt = `${prompt}\n\nHTML Content:\n${html}`;
                 const openaiEndpoint = 'https://api.openai.com/v1/chat/completions';
@@ -148,11 +154,56 @@ function analyseWithLLM(html) {
                             schema: {
                                 type: 'object',
                                 properties: {
-                                    "emotionsFeature": { type: 'string' },
-                                    "biasFeature": { type: 'string' },
-                                    "informalLanguageFeature": { type: 'string' },
-                                    "scientificConsensusFeature": { type: 'string' },
-                                    "expertMisuseFeature": { type: 'string' }
+                                    "emotionsFeature": {
+                                        type: 'object',
+                                        properties: {
+                                            assessment: { type: 'string', enum: ['notPresent', 'somewhatPresent', 'stronglyPresent'] },
+                                            dutchExplanation: { type: 'string' },
+                                            englishExplanation: { type: 'string' }
+                                        },
+                                        required: ['assessment', 'dutchExplanation', 'englishExplanation'],
+                                        additionalProperties: false
+                                    },
+                                    "biasFeature": {
+                                        type: 'object',
+                                        properties: {
+                                            assessment: { type: 'string', enum: ['notPresent', 'somewhatPresent', 'stronglyPresent'] },
+                                            dutchExplanation: { type: 'string' },
+                                            englishExplanation: { type: 'string' }
+                                        },
+                                        required: ['assessment', 'dutchExplanation', 'englishExplanation'],
+                                        additionalProperties: false
+                                    },
+                                    "informalLanguageFeature": {
+                                        type: 'object',
+                                        properties: {
+                                            assessment: { type: 'string', enum: ['notPresent', 'somewhatPresent', 'stronglyPresent'] },
+                                            dutchExplanation: { type: 'string' },
+                                            englishExplanation: { type: 'string' }
+                                        },
+                                        required: ['assessment', 'dutchExplanation', 'englishExplanation'],
+                                        additionalProperties: false
+                                    },
+                                    "scientificConsensusFeature": {
+                                        type: 'object',
+                                        properties: {
+                                            assessment: { type: 'string', enum: ['notPresent', 'somewhatPresent', 'stronglyPresent'] },
+                                            dutchExplanation: { type: 'string' },
+                                            englishExplanation: { type: 'string' }
+                                        },
+                                        required: ['assessment', 'dutchExplanation', 'englishExplanation'],
+                                        additionalProperties: false
+                                    },
+                                    "expertMisuseFeature": {
+                                        type: 'object',
+                                        properties: {
+                                            assessment: { type: 'string', enum: ['notPresent', 'somewhatPresent', 'stronglyPresent'] },
+                                            dutchExplanation: { type: 'string' },
+                                            englishExplanation: { type: 'string' }
+                                        },
+                                        required: ['assessment', 'dutchExplanation', 'englishExplanation'],
+                                        additionalProperties: false
+                                    }
                                 },
                                 required: [
                                     "emotionsFeature",
@@ -187,7 +238,6 @@ function analyseWithLLM(html) {
                     });
                 }
                 catch (error) {
-                    console.error('Error calling LLM:', error);
                     reject(new Error(chrome.i18n.getMessage('analysisError')));
                 }
             }));
@@ -291,6 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
         popup.querySelector('#resetApiKeyButton').addEventListener('click', resetApiKeyHandler);
         popup.querySelector('#analyseButton').addEventListener('click', analyseButtonHandler);
         popup.querySelector('#languageSelector').addEventListener('change', languageSelectorHandler);
+        // Add listener for info icon clicks
+        document.addEventListener('click', handleInfoIconClick);
     }
     function loadMessages(lang) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -302,41 +354,63 @@ document.addEventListener('DOMContentLoaded', () => {
         var _a;
         return ((_a = messages[key]) === null || _a === void 0 ? void 0 : _a.message) || key;
     }
-    function updateLocalizedContent() {
-        chrome.storage.sync.get('language', function (data) {
-            const lang = data.language || chrome.i18n.getUILanguage();
-            console.log('Update localized content: Language is set to ' + lang);
-            loadMessages(lang).then((messages) => {
-                popup.querySelectorAll('[data-i18n]').forEach(elem => {
-                    const key = elem.getAttribute('data-i18n');
-                    if (key)
-                        elem.textContent = getCustomMessage(messages, key);
-                });
-                popup.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
-                    const key = elem.getAttribute('data-i18n-placeholder');
-                    if (key)
-                        elem.placeholder = getCustomMessage(messages, key);
-                });
-                popup.querySelectorAll('[data-i18n-title]').forEach(elem => {
-                    const key = elem.getAttribute('data-i18n-title');
-                    if (key)
-                        elem.setAttribute('title', getCustomMessage(messages, key));
-                });
-                popup.querySelectorAll('[data-i18n-href]').forEach(elem => {
-                    const key = elem.getAttribute('data-i18n-href');
-                    if (key)
-                        elem.href = getCustomMessage(messages, key);
-                });
-                // Set the language selector to the current language
-                const languageSelector = popup.querySelector('#languageSelector');
-                if (languageSelector) {
-                    Array.from(languageSelector.options).forEach(option => {
-                        if (option.value === lang) {
-                            option.selected = true;
-                        }
-                    });
+    function handleInfoIconClick(event) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const target = event.target;
+            if (target.classList.contains('info-icon')) {
+                event.stopPropagation();
+                const explanationBox = document.getElementById('explanationBox');
+                const lang = yield getCurrentLanguage();
+                const explanation = target.getAttribute(`data-explanation-${lang === 'nl' ? 'nl' : 'en'}`);
+                if (explanationBox && explanation) {
+                    explanationBox.textContent = explanation;
                 }
-                updateDynamicContent(messages);
+                (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#explanationBox');
+            }
+        });
+    }
+    function getCurrentLanguage() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield chrome.storage.sync.get('language');
+            return data.language || chrome.i18n.getUILanguage();
+        });
+    }
+    function updateLocalizedContent() {
+        chrome.storage.sync.get('language', function () {
+            return __awaiter(this, void 0, void 0, function* () {
+                const lang = yield getCurrentLanguage();
+                loadMessages(lang).then((messages) => {
+                    popup.querySelectorAll('[data-i18n]').forEach(elem => {
+                        const key = elem.getAttribute('data-i18n');
+                        if (key)
+                            elem.textContent = getCustomMessage(messages, key);
+                    });
+                    popup.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
+                        const key = elem.getAttribute('data-i18n-placeholder');
+                        if (key)
+                            elem.placeholder = getCustomMessage(messages, key);
+                    });
+                    popup.querySelectorAll('[data-i18n-title]').forEach(elem => {
+                        const key = elem.getAttribute('data-i18n-title');
+                        if (key)
+                            elem.setAttribute('title', getCustomMessage(messages, key));
+                    });
+                    popup.querySelectorAll('[data-i18n-href]').forEach(elem => {
+                        const key = elem.getAttribute('data-i18n-href');
+                        if (key)
+                            elem.href = getCustomMessage(messages, key);
+                    });
+                    // Set the language selector to the current language
+                    const languageSelector = popup.querySelector('#languageSelector');
+                    if (languageSelector) {
+                        Array.from(languageSelector.options).forEach(option => {
+                            if (option.value === lang) {
+                                option.selected = true;
+                            }
+                        });
+                    }
+                    updateDynamicContent(messages);
+                });
             });
         });
     }
@@ -349,7 +423,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (apiKey) {
                 saveButton.disabled = true;
                 const isValid = yield (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.validateApiKey)(apiKey);
-                console.log('Is valid:', isValid);
                 if (isValid) {
                     (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.saveApiKey)(apiKey);
                     updateUIForAnalysis();
@@ -371,7 +444,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function languageSelectorHandler(event) {
         const newLang = event.target.value;
         chrome.storage.sync.set({ language: newLang }, function () {
-            console.log('Language selector handler Language is set to ' + newLang);
             updateLocalizedContent();
             updateUIForCurrentState();
         });
@@ -395,14 +467,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.hideElement)('#loading');
                             (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#articlesContent');
                             if (result && result.content) {
-                                fillResultsTable(result);
+                                fillResultsTable(result, (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.getDomainNameFromUrl)(new URL(url)));
                                 updateLocalizedContent();
                             }
                             else {
                                 articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('emptyResponse')}</div>`;
                             }
                         }).catch((error) => {
-                            console.error('Error in analyseWithLLM:', error);
                             (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.hideElement)('#loading');
                             (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#articlesContent');
                             articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('analysisError', error.message)}</div>`;
@@ -434,7 +505,6 @@ document.addEventListener('DOMContentLoaded', () => {
             headers[0].textContent = getCustomMessage(messages, 'featureColumnHeader');
         if (headers[1])
             headers[1].textContent = getCustomMessage(messages, 'assessmentColumnHeader');
-        console.log(`messages: ${messages}`);
         // Update feature names and assessments
         const features = [
             'emotionsFeature',
@@ -452,14 +522,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const assessmentKey = assessmentCell.getAttribute('data-assessment-key');
                 if (assessmentKey) {
                     const assessmentMessage = getCustomMessage(messages, assessmentKey);
-                    console.log(`assessmentMessage: ${assessmentMessage}`);
-                    console.log(`assessmentKey: ${assessmentKey}`);
-                    console.log(`assessmentCell: ${assessmentCell}`);
-                    console.log(`icon: ${getSvgIcon(assessmentKey)}`);
-                    assessmentCell.innerHTML = `${getSvgIcon(assessmentKey)} ${assessmentMessage}`;
+                    const infoIcon = assessmentCell.querySelector('.info-icon');
+                    // Preserve the info icon if it exists
+                    if (infoIcon) {
+                        assessmentCell.innerHTML = `${getSvgIcon(assessmentKey)} ${assessmentMessage} `;
+                        assessmentCell.appendChild(infoIcon);
+                    }
+                    else {
+                        assessmentCell.innerHTML = `${getSvgIcon(assessmentKey)} ${assessmentMessage}`;
+                    }
                 }
             }
         });
+        // Update explanation box
+        const explanationBox = popup.querySelector('#explanationBox');
+        if (explanationBox) {
+            const explanationKey = explanationBox.getAttribute('data-explanation-key');
+            if (explanationKey)
+                explanationBox.textContent = getCustomMessage(messages, explanationKey);
+        }
         // Update context sentence
         const contextParagraph = popup.querySelector('.context-sentence');
         if (contextParagraph) {
@@ -496,7 +577,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const k = assessmentKey;
         return svgIcons[k] || '';
     }
-    function fillResultsTable(data) {
+    function fillResultsTable(data, domain) {
+        (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.hideElement)('#explanationBox');
         const resultsTable = document.createElement('table');
         resultsTable.id = 'daResultsTable';
         resultsTable.innerHTML = `
@@ -525,14 +607,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const assessmentCell = document.createElement('td');
             featureCell.setAttribute('data-feature', feature);
             assessmentCell.setAttribute('data-assessment', feature);
-            const assessmentKey = parsedData[feature];
+            const assessmentKey = parsedData[feature]['assessment'];
             assessmentCell.setAttribute('data-assessment-key', assessmentKey);
-            // assessmentCell.innerHTML = `${icon} ${} `;
+            const dutchExplanation = parsedData[feature]['dutchExplanation'];
+            const englishExplanation = parsedData[feature]['englishExplanation'];
+            // Create info icon
+            const infoIcon = document.createElement('span');
+            infoIcon.className = 'info-icon';
+            infoIcon.textContent = 'ℹ️';
+            infoIcon.setAttribute('data-explanation-nl', dutchExplanation);
+            infoIcon.setAttribute('data-explanation-en', englishExplanation);
+            assessmentCell.appendChild(document.createTextNode(' ')); // Add a space
+            assessmentCell.appendChild(infoIcon);
             row.appendChild(featureCell);
             row.appendChild(assessmentCell);
             resultsTableTBody.appendChild(row);
         });
-        const contextSentence = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.getContextSentence)(parsedData);
+        const contextSentence = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.getContextSentence)(domain);
         if (contextSentence) {
             const contextParagraph = document.createElement('p');
             contextParagraph.setAttribute('data-context-key', contextSentence);
@@ -540,7 +631,6 @@ document.addEventListener('DOMContentLoaded', () => {
             popup.querySelector('#articlesContent').appendChild(contextParagraph);
         }
         const cost = data.outputTokens * 0.0000006 + data.inputTokens * 0.00000015;
-        console.log(`Estimated cost: ${cost}`);
     }
     function getSelectorByDomain(url) {
         const parsedUrl = new URL(url);
