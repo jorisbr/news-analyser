@@ -656,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nieuwnieuws: 'div.app-container.article',
             ninefornews: '#the-post',
             nos: '#content',
-            nrc: 'article.vorm_article',
+            nrc: '.vorm__article-theme-wrapper',
             nu: '.blocks-container-article',
             oann: 'article',
             parool: 'article#article-content',
