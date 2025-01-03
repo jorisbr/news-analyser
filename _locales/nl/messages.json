@@ -83,7 +83,21 @@
         "message": "https://wild-merrill-no-name-org-420b310d.koyeb.app/",
         "description": "Text for the link to more information"
     },
+    "apiKeyNotSet": {
+      "message": "API key is nog niet ingevuld.",
+      "description": "Error message when API key is not set"
+  },
+    "analysisError": {
+      "message": "Er was een fout bij de analyse van de content.",
+      "description": "Error message when analysis fails"
+  },
     "invalidApiKey": {
         "message": "Ongeldige API-sleutel. Check of de sleutel correct is ingevoerd."
+    },
+    "extractionFailed": {
+        "message": "Het ophalen van het artikel is mislukt."
+    },
+    "unsupportedWebsite": {
+        "message": "Deze website wordt niet ondersteund."
     }
   }

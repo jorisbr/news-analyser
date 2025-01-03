@@ -372,45 +372,43 @@ document.addEventListener('DOMContentLoaded', () => {
     function getCurrentLanguage() {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield chrome.storage.sync.get('language');
-            return data.language || chrome.i18n.getUILanguage();
+            return data.language || 'nl';
         });
     }
     function updateLocalizedContent() {
-        chrome.storage.sync.get('language', function () {
-            return __awaiter(this, void 0, void 0, function* () {
-                const lang = yield getCurrentLanguage();
-                loadMessages(lang).then((messages) => {
-                    popup.querySelectorAll('[data-i18n]').forEach(elem => {
-                        const key = elem.getAttribute('data-i18n');
-                        if (key)
-                            elem.textContent = getCustomMessage(messages, key);
-                    });
-                    popup.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
-                        const key = elem.getAttribute('data-i18n-placeholder');
-                        if (key)
-                            elem.placeholder = getCustomMessage(messages, key);
-                    });
-                    popup.querySelectorAll('[data-i18n-title]').forEach(elem => {
-                        const key = elem.getAttribute('data-i18n-title');
-                        if (key)
-                            elem.setAttribute('title', getCustomMessage(messages, key));
-                    });
-                    popup.querySelectorAll('[data-i18n-href]').forEach(elem => {
-                        const key = elem.getAttribute('data-i18n-href');
-                        if (key)
-                            elem.href = getCustomMessage(messages, key);
-                    });
-                    // Set the language selector to the current language
-                    const languageSelector = popup.querySelector('#languageSelector');
-                    if (languageSelector) {
-                        Array.from(languageSelector.options).forEach(option => {
-                            if (option.value === lang) {
-                                option.selected = true;
-                            }
-                        });
-                    }
-                    updateDynamicContent(messages);
+        return __awaiter(this, void 0, void 0, function* () {
+            const lang = yield getCurrentLanguage();
+            loadMessages(lang).then((messages) => {
+                popup.querySelectorAll('[data-i18n]').forEach(elem => {
+                    const key = elem.getAttribute('data-i18n');
+                    if (key)
+                        elem.textContent = getCustomMessage(messages, key);
                 });
+                popup.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
+                    const key = elem.getAttribute('data-i18n-placeholder');
+                    if (key)
+                        elem.placeholder = getCustomMessage(messages, key);
+                });
+                popup.querySelectorAll('[data-i18n-title]').forEach(elem => {
+                    const key = elem.getAttribute('data-i18n-title');
+                    if (key)
+                        elem.setAttribute('title', getCustomMessage(messages, key));
+                });
+                popup.querySelectorAll('[data-i18n-href]').forEach(elem => {
+                    const key = elem.getAttribute('data-i18n-href');
+                    if (key)
+                        elem.href = getCustomMessage(messages, key);
+                });
+                // Set the language selector to the current language
+                const languageSelector = popup.querySelector('#languageSelector');
+                if (languageSelector) {
+                    Array.from(languageSelector.options).forEach(option => {
+                        if (option.value === lang) {
+                            option.selected = true;
+                        }
+                    });
+                }
+                updateDynamicContent(messages);
             });
         });
     }
@@ -457,7 +455,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const selector = getSelectorByDomain(url);
             if (!selector) {
                 (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#articlesContent');
-                articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('unsupportedWebsite')}</div>`;
+                articlesContentDiv.innerHTML = `<div data-i18n="unsupportedWebsite">${chrome.i18n.getMessage('unsupportedWebsite')}</div>`;
+                updateLocalizedContent();
             }
             else {
                 (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#loading');
@@ -472,20 +471,24 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                             else {
                                 articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('emptyResponse')}</div>`;
+                                updateLocalizedContent();
                             }
                         }).catch((error) => {
                             (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.hideElement)('#loading');
                             (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#articlesContent');
                             articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('analysisError', error.message)}</div>`;
+                            updateLocalizedContent();
                         });
                     }
                     else {
                         (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.hideElement)('#loading');
                         (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.showElement)('#articlesContent');
                         articlesContentDiv.innerHTML = `<div>${chrome.i18n.getMessage('extractionFailed')}</div>`;
+                        updateLocalizedContent();
                     }
                 });
             }
+            updateLocalizedContent();
         });
     }
     function showRelevantSection() {
@@ -579,6 +582,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function fillResultsTable(data, domain) {
         (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.hideElement)('#explanationBox');
+        // Remove existing table if it exists
+        const existingTable = document.getElementById('daResultsTable');
+        if (existingTable) {
+            existingTable.remove();
+        }
+        // Remove existing context sentence if it exists
+        const existingContextSentence = document.querySelector('.context-sentence');
+        if (existingContextSentence) {
+            existingContextSentence.remove();
+        }
         const resultsTable = document.createElement('table');
         resultsTable.id = 'daResultsTable';
         resultsTable.innerHTML = `

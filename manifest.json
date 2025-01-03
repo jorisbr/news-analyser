@@ -3,7 +3,7 @@
   "default_locale": "nl",
   "name": "__MSG_extensionName__",
   "description": "__MSG_extensionDescription__",
-  "version": "2.0",
+  "version": "3.0",
   "permissions": [
     "activeTab",
     "storage"

@@ -87,15 +87,17 @@
         "message": "API key is not set. Please enter your API key.",
         "description": "Error message when API key is not set"
     },
-    "analysisPrompt": {
-        "message": "You are a news article classifier assessing whether a news article is fake news or not.\n\nYou should evaluate each news article on three content features:\nUse and presence of emotions: Greater use of emotive and affective language. Especially negative emotions typically more present. In news, content contains heavy emotional appeal to readers, provoking fear, anger, outrage.\nIdeological bias: (Hyper-)partisan bias, often with a right-leaning ideological orientation. Negative references to left-leaning, progressive political actors or issues, positive references to (populist) right leaning political actors or issues\nInformal words and language: More use of informal words and informal language (slang, swear). Higher likelihood of hate speech and incivility.\nFacts go against scientific consensus: evidence and claims made go against conventional facts or scientific consensus.\nMisuse of experts: Irrelevant or non-legitimate experts are cited who have no knowledge of the topic.\n\nGive an assessment for each feature expressing to which extent a feature applies, use the following labels:\n- not present\n- Somewhat present\n- Strongly present\nreturn the results as a pure JSON object without any additional text or explanation. The JSON object should have the following structure:\n{\n  \"Use and presence of emotions\": \"label\",\n  \"Ideological bias\": \"label\",\n  \"Informal words and language\": \"label\",\n  \"Facts go against scientific consensus\": \"label\",\n  \"Misuse of experts\": \"label\"\n}",
-        "description": "Prompt for the news article analysis"
-    },
     "analysisError": {
         "message": "An error occurred while analysing the content.",
         "description": "Error message when analysis fails"
     },
     "invalidApiKey": {
         "message": "Invalid API key, please check and try again."
+    },
+    "extractionFailed": {
+        "message": "Retrieving the article content failed."
+    },
+    "unsupportedWebsite": {
+        "message": "This website is currently not supported for analysis."
     }
 }
