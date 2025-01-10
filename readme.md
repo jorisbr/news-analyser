@@ -1,3 +1,9 @@
+A chrome extension for online news article feedback.
+
+More information found [here](https://wild-merrill-no-name-org-420b310d.koyeb.app/)
+
+Checkout the extenion in the Chrome store [here](https://chromewebstore.google.com/detail/news-analyser/ffpihdhnicdfjbjghbeabcjjmfgalafp)
+
 Development:
 `npm run watch`
 
